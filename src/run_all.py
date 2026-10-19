@@ -10,7 +10,11 @@ their run() functions get called here too, in order.
 """
 
 import clean_data
+import run_sql
 
 if __name__ == "__main__":
     print("=== Phase 1: Clean and audit raw data ===")
     clean_data.run()
+
+    print("\n=== Phase 2: Load into SQLite and run SQL metrics ===")
+    run_sql.run()

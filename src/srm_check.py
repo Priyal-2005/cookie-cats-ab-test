@@ -42,6 +42,21 @@ def run():
     n_gate_30 = int((df["version"] == "gate_30").sum())
     n_gate_40 = int((df["version"] == "gate_40").sum())
     total = n_gate_30 + n_gate_40
+
+    # This check's entire job is to catch data-integrity problems, so it
+    # shouldn't silently ignore rows that aren't "gate_30"/"gate_40" - a
+    # NaN, typo, or a future third test arm should be reported, not dropped.
+    n_other = len(df) - total
+    if n_other > 0:
+        print(f"WARNING: {n_other} row(s) have a version value other than "
+              f"'gate_30'/'gate_40' and are excluded from this chi-square test.")
+
+    if total == 0:
+        raise ValueError(
+            f"No rows with version 'gate_30' or 'gate_40' found in {DATA_PATH} - "
+            f"cannot run the sample ratio mismatch check."
+        )
+
     expected = total / 2  # what each group "should" have under a true 50/50 split
 
     chi2 = ((n_gate_30 - expected) ** 2) / expected + ((n_gate_40 - expected) ** 2) / expected
@@ -63,6 +78,7 @@ def run():
     result = pd.DataFrame([{
         "n_gate_30": n_gate_30,
         "n_gate_40": n_gate_40,
+        "n_other_version": n_other,
         "total": total,
         "expected_per_group": expected,
         "chi2": round(chi2, 4),

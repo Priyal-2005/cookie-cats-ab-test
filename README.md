@@ -107,11 +107,12 @@ Requires: `pandas`, `numpy`, `matplotlib`, `sqlite3` (Python standard library), 
 
 ## How I used AI
 
-Claude Code drafted the data cleaning, validation, and charting code
-(`src/clean_data.py`, `src/validate.py`, `src/ab_test.py`, `src/sensitivity.py`,
-`src/charts.py`, `src/dashboard_exports.py`, `src/run_all.py`, and SQL files `sql/03` and
-`sql/04`). **I wrote `sql/01_retention_by_version.sql` and `sql/02_rounds_buckets.sql`
-myself** — Claude Code reviewed them for bugs but did not rewrite them. Every metric in
+Claude Code drafted the data cleaning, loading, validation, and charting code
+(`src/clean_data.py`, `src/load_to_sqlite.py`, `src/run_sql.py`, `src/validate.py`,
+`src/ab_test.py`, `src/sensitivity.py`, `src/charts.py`, `src/dashboard_exports.py`,
+`src/run_all.py`, and SQL files `sql/03` and `sql/04`). **I wrote
+`sql/01_retention_by_version.sql` and `sql/02_rounds_buckets.sql` myself** — Claude Code
+reviewed them for bugs but did not rewrite them. Every metric in
 this project was cross-checked against an independent pandas calculation before being
 reported (`outputs/validation_report.md`). Mistakes Claude Code made during this project,
 how they were caught, and what changed are logged in `docs/ai_mistakes_log.md`.

@@ -26,7 +26,7 @@ and whether they returned on day 1 / day 7.
    trusting any retention number built on top of it. (`src/srm_check.py`)
 3. **Load** the cleaned data into SQLite and compute retention metrics in SQL.
    (`src/load_to_sqlite.py`, `src/run_sql.py`, `sql/*.sql`)
-4. **Validate** every SQL metric with an independent pandas calculation, so no number in
+4. **Validate** every SQL metric with a separate pandas calculation, so no number in
    this README is trusted without a second, separate check. (`src/validate.py`)
 5. **Test**: compute the retention gap between versions and a 95% bootstrap confidence
    interval for that gap, to see if the difference could just be random chance.
@@ -89,14 +89,12 @@ Requires: `pandas`, `numpy`, `matplotlib`, `sqlite3` (Python standard library), 
   — the conclusion **does not change**.
 - Average rounds played: `gate_30` = 52.46, `gate_40` = 51.30 rounds per player
   [outputs/sql/04_summary.csv].
-- Every one of the 16 SQL metrics checked against an independent pandas calculation
+- Every one of the 16 SQL metrics checked against a separate pandas calculation
   **passed** with zero difference [outputs/validation_report.md].
 
 ### Tableau Public dashboard
 
-> _Screenshot placeholder: paste your Tableau Public dashboard screenshot(s) here._
->
-> _Dashboard link placeholder: add your published Tableau Public URL here._
+> Dashboard: https://public.tableau.com/app/profile/priyal.sarda/viz/CookieCatsABTestPlayerRetention/ABResult
 >
 > Built from the flat CSVs in `outputs/dashboard/` (`retention_by_version.csv`,
 > `rounds_buckets.csv`, `ab_test_result.csv`).
@@ -143,6 +141,6 @@ The sample ratio mismatch check itself was added after a skeptical self-review s
 that it was missing (see `docs/ai_mistakes_log.md`). **I wrote
 `sql/01_retention_by_version.sql` and `sql/02_rounds_buckets.sql` myself** — Claude Code
 reviewed them for bugs but did not rewrite them. Every metric in
-this project was cross-checked against an independent pandas calculation before being
+this project was cross-checked against a separate pandas calculation before being
 reported (`outputs/validation_report.md`). Mistakes Claude Code made during this project,
 how they were caught, and what changed are logged in `docs/ai_mistakes_log.md`.

@@ -1,0 +1,6 @@
+step,rows_before,rows_after,rows_removed,notes
+load_raw_data,,90189,0,Initial load from data/raw/cookie_cats.csv
+drop_duplicate_userids,90189,90189,0,No duplicate userids found - nothing removed.
+keep_zero_round_players,90189,90189,0,"Kept 3994 players with 0 rounds (installed but never played) - not dropped, per project rule."
+flag_outliers,90189,90189,0,"Flagged 10 rows with sum_gamerounds above the 99.99th percentile (threshold=2013.0). Flagged values: [49854, 2961, 2640, 2438, 2294, 2251, 2156, 2124, 2063, 2015]. Rows were NOT deleted."
+add_rounds_bucket,90189,90189,0,"Added rounds_bucket (categories: ['0', '1-4', '5-9', '10-19', '20-29', '30-39', '40-49', '50-99', '100-199', '200+']) and bucket_order (1-10) columns."

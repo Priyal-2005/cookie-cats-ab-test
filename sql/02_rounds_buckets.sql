@@ -1,0 +1,4 @@
+-- Goal: for each version AND each rounds_bucket: players, day-1 retention %, day-7 retention %.
+-- TODO: SELECT version, rounds_bucket, bucket_order, COUNT(*), retention percentages
+-- TODO: GROUP BY version, rounds_bucket, bucket_order
+-- TODO: ORDER BY version, bucket_order

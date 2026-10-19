@@ -1,0 +1,2 @@
+n_gate_30,n_gate_40,total,expected_per_group,chi2,p_value,significance_level,srm_detected
+44700,45489,90189,45094.5,6.9024,0.008608,0.05,True

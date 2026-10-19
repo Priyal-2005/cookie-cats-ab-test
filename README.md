@@ -22,16 +22,18 @@ and whether they returned on day 1 / day 7.
 
 1. **Clean** the raw data: check for duplicates, nulls, and bad types; flag (not delete)
    extreme outliers; bucket players by rounds played. (`src/clean_data.py`)
-2. **Load** the cleaned data into SQLite and compute retention metrics in SQL.
+2. **Check the version split itself** with a sample ratio mismatch (SRM) test, before
+   trusting any retention number built on top of it. (`src/srm_check.py`)
+3. **Load** the cleaned data into SQLite and compute retention metrics in SQL.
    (`src/load_to_sqlite.py`, `src/run_sql.py`, `sql/*.sql`)
-3. **Validate** every SQL metric with an independent pandas calculation, so no number in
+4. **Validate** every SQL metric with an independent pandas calculation, so no number in
    this README is trusted without a second, separate check. (`src/validate.py`)
-4. **Test**: compute the retention gap between versions and a 95% bootstrap confidence
+5. **Test**: compute the retention gap between versions and a 95% bootstrap confidence
    interval for that gap, to see if the difference could just be random chance.
    (`src/ab_test.py`)
-5. **Sensitivity check**: repeat the test excluding flagged outliers, to make sure a
+6. **Sensitivity check**: repeat the test excluding flagged outliers, to make sure a
    handful of extreme players aren't driving the result. (`src/sensitivity.py`)
-6. **Charts and dashboard exports** for a Tableau Public dashboard. (`src/charts.py`,
+7. **Charts and dashboard exports** for a Tableau Public dashboard. (`src/charts.py`,
    `src/dashboard_exports.py`)
 
 ## Folder structure
@@ -64,6 +66,16 @@ Requires: `pandas`, `numpy`, `matplotlib`, `sqlite3` (Python standard library), 
 
 ## Key findings
 
+> **Caveat before anything else: the version split fails a sample ratio mismatch (SRM)
+> check.** The actual split is 44,700 `gate_30` vs 45,489 `gate_40` players. A chi-square
+> goodness-of-fit test against a true 50/50 split gives chi2 = 6.9024, p = 0.008608
+> [outputs/srm_check.csv] — below the conventional 0.05 threshold, meaning this split is
+> unlikely to have happened under genuinely random assignment. **The cause cannot be
+> determined from this dataset** (it could be a logging gap, a crash affecting one arm, or
+> something else) — we only know the split looks off. Every retention number below should
+> be read with that caveat: this dataset gives no way to rule out the two groups differing
+> in some way unrelated to the gate itself.
+
 - **Day-1 retention**: `gate_30` = 44.82%, `gate_40` = 44.23%, a difference of -0.59
   percentage points (gate_40 minus gate_30), 95% bootstrap CI = [-1.23, 0.05] percentage
   points [outputs/ab_test_result.csv]. The interval includes 0, so **this difference is
@@ -91,6 +103,22 @@ Requires: `pandas`, `numpy`, `matplotlib`, `sqlite3` (Python standard library), 
 
 ## Assumptions and limitations
 
+- **The version split fails a sample ratio mismatch check** (chi2 = 6.9024, p = 0.008608
+  [outputs/srm_check.csv]) — see the caveat at the top of Key Findings above. This is the
+  single biggest limitation of this analysis: it calls into question whether `gate_30` and
+  `gate_40` were assigned in a genuinely unbiased way, and the cause can't be identified
+  from this dataset alone.
+- **Bucket-level differences (by `rounds_bucket`) are descriptive only — no confidence
+  intervals were computed per bucket.** `sql/02_rounds_buckets.sql` and
+  `sql/03_retention_by_bucket_gap.sql` show gaps per bucket, but only the two headline
+  metrics (overall day-1 and day-7 retention) went through the bootstrap significance test.
+  A gap that looks large in one bucket in the chart has not been tested for significance
+  and should not be read as a validated finding on its own.
+- **Rounds played (`sum_gamerounds`) can itself be affected by the gate being tested**, not
+  just by how engaged a player generally is. A player who hits `gate_30` may stop
+  progressing sooner than a player who doesn't hit a gate until level 40, purely because
+  the gate is in their way earlier — so bucketing or comparing by rounds played can
+  partly reflect the gate's own effect rather than a clean, independent engagement measure.
 - **No dates in this dataset.** Every row is a lifetime snapshot — there are no
   timestamps, so trends over time (e.g. did retention change week by week during the
   test?) cannot be analyzed, only the aggregate difference between groups.
@@ -108,9 +136,11 @@ Requires: `pandas`, `numpy`, `matplotlib`, `sqlite3` (Python standard library), 
 ## How I used AI
 
 Claude Code drafted the data cleaning, loading, validation, and charting code
-(`src/clean_data.py`, `src/load_to_sqlite.py`, `src/run_sql.py`, `src/validate.py`,
-`src/ab_test.py`, `src/sensitivity.py`, `src/charts.py`, `src/dashboard_exports.py`,
-`src/run_all.py`, and SQL files `sql/03` and `sql/04`). **I wrote
+(`src/clean_data.py`, `src/srm_check.py`, `src/load_to_sqlite.py`, `src/run_sql.py`,
+`src/validate.py`, `src/ab_test.py`, `src/sensitivity.py`, `src/charts.py`,
+`src/dashboard_exports.py`, `src/run_all.py`, and SQL files `sql/03` and `sql/04`).
+The sample ratio mismatch check itself was added after a skeptical self-review surfaced
+that it was missing (see `docs/ai_mistakes_log.md`). **I wrote
 `sql/01_retention_by_version.sql` and `sql/02_rounds_buckets.sql` myself** — Claude Code
 reviewed them for bugs but did not rewrite them. Every metric in
 this project was cross-checked against an independent pandas calculation before being
